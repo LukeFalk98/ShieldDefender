@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ShieldDefender.Screens;
 
 namespace ShieldDefender
 {
@@ -8,7 +9,8 @@ namespace ShieldDefender
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch spriteBatch;
-
+        private ScreenManager manager;
+        /*
         private CursorArrow cursor;
         private Option[] Options;
         private SpriteFont gravedigger;
@@ -22,42 +24,44 @@ namespace ShieldDefender
         private float spawnTime;
         private System.Random rand;
         private float difficulty;
-
+        */
         public ShieldDefenderGame()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
+            manager = new ScreenManager(this);
         }
 
         protected override void Initialize()
-        {
+        {/*
             // TODO: Add your initialization logic here
             cursor = new CursorArrow();
             Options = new Option[]
             {
-                new Option(new Vector2(GraphicsDevice.Viewport.Width / 2, 200), "PlayButton", 172f, 64f),
-                new Option(new Vector2(GraphicsDevice.Viewport.Width / 2, 300), "QuitButton", 172f, 64f),
+                new Option(new Vector2(400, 200), "PlayButton", 172f, 64f),
+                new Option(new Vector2(400, 300), "QuitButton", 172f, 64f),
             };
             logo = new Logo(new Vector2(480, 30));
-            rand = new System.Random();
+            rand = new System.Random();*/
+            manager.Initialize();
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
-            cursor.LoadContent(this.Content);
+            spriteBatch = new SpriteBatch(GraphicsDevice);/*
+            cursor.LoadContent(Content);
             foreach (Option o in Options) o.LoadContent(Content);
             gravedigger = Content.Load<SpriteFont>("GraveDigger");
-            logo.LoadContent(this.Content);
+            logo.LoadContent(Content);*/
+            // TODO: use this.Content to load your game content here
+            manager.Load(Content);
         }
 
         protected override void Update(GameTime gameTime)
-        {
+        {/*
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             if (gameStart && !gameOver)
@@ -131,14 +135,15 @@ namespace ShieldDefender
                         }
                     }
                 }
-            }
+            }*/
+            manager.Update(gameTime);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.DarkGray);
+            GraphicsDevice.Clear(Color.DarkGray);/*
             // TODO: Add your drawing code here
             if (gameStart && !gameOver)
             {
@@ -154,9 +159,9 @@ namespace ShieldDefender
                 spriteBatch.Begin();
                 foreach (Arrow a in arrows) if (a != null) a.Draw(spriteBatch);
                 player.Draw(spriteBatch);
-                spriteBatch.DrawString(gravedigger, "GAME OVER", new Vector2(GraphicsDevice.Viewport.Width / 2, 20), Color.Red, 0f, new Vector2(100, 0), 1f, SpriteEffects.None, 0);
-                spriteBatch.DrawString(gravedigger, "Score: " + score.ToString(), new Vector2(GraphicsDevice.Viewport.Width / 2, 70), Color.Red, 0f, new Vector2(40, 0), .75f, SpriteEffects.None, 0);
-                spriteBatch.DrawString(gravedigger, "To retry, press A or SPACE\nor press BACK or ESCAPE to quit.", new Vector2(GraphicsDevice.Viewport.Width / 2, 150), Color.Red, 0f, new Vector2(270, 0), .5f, SpriteEffects.None, 0);
+                spriteBatch.DrawString(gravedigger, "GAME OVER", new Vector2(370, 20), Color.Red, 0f, new Vector2(100, 0), 1f, SpriteEffects.None, 0);
+                spriteBatch.DrawString(gravedigger, "Score: " + score.ToString(), new Vector2(370, 70), Color.Red, 0f, new Vector2(40, 0), .75f, SpriteEffects.None, 0);
+                spriteBatch.DrawString(gravedigger, "To retry, press A or SPACE\nor press BACK or ESCAPE to quit.", new Vector2(370, 150), Color.Red, 0f, new Vector2(270, 0), .5f, SpriteEffects.None, 0);
                 spriteBatch.End();
             }
             else
@@ -164,15 +169,15 @@ namespace ShieldDefender
                 spriteBatch.Begin();
                 foreach (Option O in Options) O.Draw(spriteBatch);
                 logo.Draw(gameTime, spriteBatch);
-                spriteBatch.DrawString(gravedigger, "  Shield\nDefender", new Vector2(GraphicsDevice.Viewport.Width / 2, 20), Color.Red, 0f, new Vector2(110, 0), 1, SpriteEffects.None, 0);
-                spriteBatch.DrawString(gravedigger, "Use mouse or left thumbstick to move\nA or click to select.", new Vector2(2, GraphicsDevice.Viewport.Height - 45), Color.Red, 0, Vector2.Zero, .3f, SpriteEffects.None, 0);
+                spriteBatch.DrawString(gravedigger, "  Shield\nDefender", new Vector2(400, 20), Color.Red, 0f, new Vector2(110, 0), 1, SpriteEffects.None, 0);
+                spriteBatch.DrawString(gravedigger, "Use mouse or left thumbstick to move\nA or click to select.", new Vector2(2, 425), Color.Red, 0, Vector2.Zero, .3f, SpriteEffects.None, 0);
                 cursor.Draw(gameTime, spriteBatch);
                 spriteBatch.End();
-            }
-
+            }*/
+            manager.Draw(gameTime, spriteBatch);
             base.Draw(gameTime);
         }
-
+        /*
         private void LoadGame(GameTime gameTime)
         {
             player = new Player(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
@@ -216,6 +221,6 @@ namespace ShieldDefender
             {
                 if (arrow == arrows[i]) arrows[i] = null;
             }
-        }
+        }*/
     }
 }

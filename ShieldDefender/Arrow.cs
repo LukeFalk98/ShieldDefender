@@ -20,7 +20,13 @@ namespace ShieldDefender
     {
         private Vector2 position;
         private float speed;
+        private float vertVelocity = -6; // only when the arrow is deflected is this calculated
+        const float vertAcceleration = 1;
+        private float rotation;
+        const float rotationSpeed = .45f;
         private Texture2D texture;
+
+        private bool active = true;
 
         public BoundingCircle Bounds;
         public Direction Direction;
@@ -28,7 +34,11 @@ namespace ShieldDefender
         /// <summary>
         /// whether or not the arrow is on screen
         /// </summary>
-        public bool Active = true;
+        public bool Active => active;
+        /// <summary>
+        /// Whether or not the arrow has been deflected by shield
+        /// </summary>
+        public bool Deflected = false;
 
         public Arrow(Direction direction, float speed, Vector2 position)
         {
@@ -45,39 +55,65 @@ namespace ShieldDefender
 
         public void Update(GameTime gameTime, int width, int height)
         {
-            switch (Direction)
+            if (!Deflected)
             {
-                case Direction.down:
-                    position += new Vector2(0, 100) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    Bounds.Center = position + new Vector2(0, 16);
-                    break;
-                case Direction.up:
-                    position += new Vector2(0, -100) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    Bounds.Center = position + new Vector2(0, -16);
-                    break;
-                case Direction.left:
-                    position += new Vector2(-100, 0) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    Bounds.Center = position + new Vector2(-16, 0);
-                    break;
-                case Direction.right:
-                    position += new Vector2(100, 0) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    Bounds.Center = position + new Vector2(16, 0);
-                    break;
+                switch (Direction)
+                {
+                    case Direction.down:
+                        position += new Vector2(0, 100) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        Bounds.Center = position + new Vector2(0, 16);
+                        break;
+                    case Direction.up:
+                        position += new Vector2(0, -100) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        Bounds.Center = position + new Vector2(0, -16);
+                        break;
+                    case Direction.left:
+                        position += new Vector2(-100, 0) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        Bounds.Center = position + new Vector2(-16, 0);
+                        break;
+                    case Direction.right:
+                        position += new Vector2(100, 0) * speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        Bounds.Center = position + new Vector2(16, 0);
+                        break;
+                }
+            }
+            else
+            {
+                if (Direction == Direction.left) rotation -= rotationSpeed;
+                else rotation += rotationSpeed;
+
+                Vector2 modPosition;
+                vertVelocity += vertAcceleration;
+                if (Direction == Direction.left ||
+                    Direction == Direction.up)
+                {
+                    modPosition = new Vector2(5, vertVelocity);
+                }
+                else
+                {
+                    modPosition = new Vector2(-5, vertVelocity);
+                }
+
+                position += modPosition;
             }
 
             // check if the arrow is offscreen
             if (position.X > width || position.X < 0 ||
-                position.Y > height || position.Y < 0) Active = false;
+                position.Y > height || position.Y < 0) active = false;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, position, null, Color.White, (float)Math.PI * (int)Direction / 2, new Vector2(16, 16), 1f, SpriteEffects.None, 0);
+            spriteBatch.Draw(texture, position, null, Color.White, (float)Math.PI * (int)Direction / 2 + rotation, new Vector2(16, 16), 1f, SpriteEffects.None, 0);
         }
 
         public bool Collideswith(BoundingRectangle other)
         {
-            return CollisionHelper.Collides(this.Bounds, other);
+            if (!Deflected)
+            {
+                return CollisionHelper.Collides(this.Bounds, other);
+            }
+            else return false; // the arrow has been deflected
         }
     }
 }
