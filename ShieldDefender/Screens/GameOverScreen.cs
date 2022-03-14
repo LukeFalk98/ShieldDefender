@@ -27,9 +27,11 @@ namespace ShieldDefender.Screens
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             backgroundScreen.Draw(gameTime, spriteBatch);
+            spriteBatch.Begin();
             spriteBatch.DrawString(gravedigger, "GAME OVER", new Vector2(370, 20), Color.Red, 0f, new Vector2(100, 0), 1f, SpriteEffects.None, 0);
             spriteBatch.DrawString(gravedigger, "Score: " + score.ToString(), new Vector2(370, 70), Color.Red, 0f, new Vector2(40, 0), .75f, SpriteEffects.None, 0);
             spriteBatch.DrawString(gravedigger, "To retry, press A or SPACE\nor press BACK or ESCAPE to quit.", new Vector2(370, 150), Color.Red, 0f, new Vector2(270, 0), .5f, SpriteEffects.None, 0);
+            spriteBatch.End();
         }
 
         public void Initialize(ScreenManager manager)

@@ -17,11 +17,13 @@ namespace ShieldDefender.Screens
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            spriteBatch.Begin();
             foreach (Option O in Options) O.Draw(spriteBatch);
             logo.Draw(gameTime, spriteBatch);
             spriteBatch.DrawString(gravedigger, "  Shield\nDefender", new Vector2(400, 20), Color.Red, 0f, new Vector2(110, 0), 1, SpriteEffects.None, 0);
             spriteBatch.DrawString(gravedigger, "Use mouse or left thumbstick to move\nA or click to select.", new Vector2(2, 425), Color.Red, 0, Vector2.Zero, .3f, SpriteEffects.None, 0);
             cursor.Draw(gameTime, spriteBatch);
+            spriteBatch.End();
         }
 
         public void Initialize(ScreenManager screenManager)

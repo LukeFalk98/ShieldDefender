@@ -14,13 +14,22 @@ namespace ShieldDefender.Screens
         private int score = 0;
 
         private SpriteFont gravedigger;
+        private IScreen background;
 
         private Player player;
         private Arrow[] arrows;
 
-        private float spawnTime;
+        private float arrowSpawnTime;
         private System.Random rand;
         private float difficulty;
+
+        private float bombSpawnTime;
+        private SoundEffect explosionSound;
+        private Bomb bomb;
+        private bool screenshake = false;
+        private float shakeSpeed = .1f;
+        private float shakeTimer;
+        private float shakeSwapTimer;
 
         private ContentManager content;
         private ScreenManager screenManager;
@@ -31,25 +40,60 @@ namespace ShieldDefender.Screens
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            if (screenshake)
+            {
+                shakeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                shakeSwapTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (shakeTimer > 1.5f)
+                {
+                    screenshake = false;
+                    shakeTimer -= 1.5f;
+                }
+
+                int x;
+                if (shakeSwapTimer > shakeSpeed)
+                {
+                    x = -5;
+                    if (shakeSwapTimer > shakeSpeed * 2) shakeSwapTimer -= shakeSpeed * 2;
+                }
+                else x = 5;
+
+                var transform = Matrix.CreateTranslation(x, 0, 0);
+
+                spriteBatch.Begin(transformMatrix: transform);
+            }
+            else
+            {
+                spriteBatch.Begin();
+            }
+            background.Draw(gameTime, spriteBatch);
             foreach (Arrow a in arrows) if (a != null) a.Draw(spriteBatch);
+            if (bomb.IsActive) bomb.Draw(gameTime, spriteBatch);
             player.Draw(spriteBatch);
+            spriteBatch.End();
+            spriteBatch.Begin();
             spriteBatch.DrawString(gravedigger, "Score: " + score.ToString(), new Vector2(2, 2), Color.Red, 0f, new Vector2(0, 0), .75f, SpriteEffects.None, 0);
-            spriteBatch.DrawString(gravedigger, "Use WASD, ARROW KEYS, or the LEFT ANALOG STICK to move.\nFacing an arrow will block the arrow", new Vector2(2, 435), Color.Red, 0f, new Vector2(0, 0), .25f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(gravedigger, "Use WASD, ARROW KEYS, or the LEFT ANALOG STICK to move.\nFacing an arrow will block the arrow, but not block bombs.", new Vector2(2, 435), Color.Red, 0f, new Vector2(0, 0), .25f, SpriteEffects.None, 0);
+            spriteBatch.End();
         }
 
         public void Initialize(ScreenManager manager)
         {
+            background = new BackgroundScreen();
             screenManager = manager;
             rand = new Random(); 
             player = new Player(new Vector2(400, 240));
             arrows = new Arrow[100];
             deflectSounds = new SoundEffect[4];
+            bomb = new Bomb();
             difficulty = .5f;
         }
 
         public void Load(ContentManager content)
         {
             this.content = content;
+            background.Load(content);
             gravedigger = content.Load<SpriteFont>("GraveDigger");
             player.LoadContent(content);
             for (int i = 0; i < deflectSounds.Length; i++) 
@@ -57,20 +101,22 @@ namespace ShieldDefender.Screens
                 deflectSounds[i] = content.Load<SoundEffect>("block" + i.ToString());
             }
             deathSound = content.Load<SoundEffect>("Hurt");
+            explosionSound = content.Load<SoundEffect>("ExplosionSound");
             backgroundMusic = content.Load<Song>("mixkit-infected-vibes-157");
+            bomb.LoadContent(content);
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Play(backgroundMusic);
         }
 
         public void Update(GameTime gameTime)
         {
-            spawnTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            arrowSpawnTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (spawnTime > 1 / difficulty)
+            if (arrowSpawnTime > 1 / difficulty)
             {
                 SpawnArrow();
                 score++;
-                spawnTime -= 1 / difficulty;
+                arrowSpawnTime -= 1 / difficulty;
                 difficulty += .05f;
             }
 
@@ -120,6 +166,29 @@ namespace ShieldDefender.Screens
                         a.Deflected = true;
                     }
                     if (!a.Active) DespawnArrow(a);
+                }
+            }
+
+            if (!bomb.IsActive)
+            {
+                bombSpawnTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (bombSpawnTime > 10)
+                {
+                    bomb.Reset(new Vector2((float)rand.Next(768), (float)rand.Next(448)));
+                    bombSpawnTime -= 10;
+                }
+            }
+            else
+            {
+                bomb.Update(gameTime);
+                if (bomb.IsDetonated)
+                {
+                    explosionSound.Play();
+                    screenshake = true;
+                    screenManager.GenerateExplosion(bomb.Bounds.Center);
+                    if (player.Collideswith(bomb.Bounds)) GameOver();
+                    else score += 5;
                 }
             }
         }

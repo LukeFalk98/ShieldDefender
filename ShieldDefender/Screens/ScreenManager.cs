@@ -11,9 +11,9 @@ namespace ShieldDefender.Screens
     {
         private IScreen frontScreen;
         private ContentManager content;
-        private Game parent;
+        private ShieldDefenderGame parent;
 
-        public ScreenManager(Game game)
+        public ScreenManager(ShieldDefenderGame game)
         {
             frontScreen = new TitleScreen();
             parent = game;
@@ -21,9 +21,7 @@ namespace ShieldDefender.Screens
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.Begin();
             frontScreen.Draw(gameTime, spriteBatch);
-            spriteBatch.End();
         }
 
         public void Initialize()
@@ -52,6 +50,11 @@ namespace ShieldDefender.Screens
         public void Exit()
         {
             parent.Exit();
+        }
+
+        public void GenerateExplosion(Vector2 position)
+        {
+            parent.GenerateExplosion(position);
         }
     }
 }
