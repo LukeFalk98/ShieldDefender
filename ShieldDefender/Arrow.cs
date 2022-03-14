@@ -104,7 +104,10 @@ namespace ShieldDefender
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, position, null, Color.White, (float)Math.PI * (int)Direction / 2 + rotation, new Vector2(16, 16), 1f, SpriteEffects.None, 0);
+            Color color;
+            if (Deflected) color = Color.Blue;
+            else color = Color.White;
+            spriteBatch.Draw(texture, position, null, color, (float)Math.PI * (int)Direction / 2 + rotation, new Vector2(16, 16), 1f, SpriteEffects.None, 0);
         }
 
         public bool Collideswith(BoundingRectangle other)
