@@ -93,6 +93,7 @@ namespace ShieldDefender.Screens
         public void Load(ContentManager content)
         {
             this.content = content;
+            background.Initialize(screenManager);
             background.Load(content);
             gravedigger = content.Load<SpriteFont>("GraveDigger");
             player.LoadContent(content);
