@@ -22,11 +22,12 @@ namespace ShieldDefender
         private float leftoverFuse;
 
         private Texture2D texture;
+        public Texture2D hitbox;
 
         private Vector2 position;
 
         public BoundingCircle Bounds;
-
+        
         public Bomb()
         {
 
@@ -35,6 +36,7 @@ namespace ShieldDefender
         public void LoadContent(ContentManager content)
         {
             texture = content.Load<Texture2D>("BombSet");
+            hitbox = content.Load<Texture2D>("BombHitbox");
         }
 
         public void Update(GameTime gameTime)
@@ -61,6 +63,7 @@ namespace ShieldDefender
                 }
 
                 var source = new Rectangle((animationFrame % 2) * 32, (animationFrame / 2) * 32, 32, 32);
+                spriteBatch.Draw(hitbox, new Vector2(position.X - 67, position.Y - 67), Color.White);
                 spriteBatch.Draw(texture, position, source, Color.White);
             }
         }

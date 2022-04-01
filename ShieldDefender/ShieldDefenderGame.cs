@@ -12,6 +12,7 @@ namespace ShieldDefender
         private SpriteBatch spriteBatch;
         private ScreenManager manager;
         private ExplosionParticleSystem explosions;
+        
 
         public ShieldDefenderGame()
         {
@@ -36,6 +37,7 @@ namespace ShieldDefender
             spriteBatch = new SpriteBatch(GraphicsDevice);
             // TODO: use this.Content to load your game content here
             manager.Load(Content);
+            
         }
 
         protected override void Update(GameTime gameTime)
