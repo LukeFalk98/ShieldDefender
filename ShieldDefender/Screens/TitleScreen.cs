@@ -14,10 +14,17 @@ namespace ShieldDefender.Screens
         private Logo logo;
         private SpriteFont gravedigger;
         private ScreenManager screenManager;
+        private _3DBackgroundScreen backgroundScreen;
+
+        public TitleScreen (Game game)
+        {
+            backgroundScreen = new _3DBackgroundScreen(game);
+        }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
+            backgroundScreen.Draw(gameTime, spriteBatch);
             foreach (Option O in Options) O.Draw(spriteBatch);
             logo.Draw(gameTime, spriteBatch);
             spriteBatch.DrawString(gravedigger, "  Shield\nDefender", new Vector2(400, 20), Color.Red, 0f, new Vector2(110, 0), 1, SpriteEffects.None, 0);
@@ -36,6 +43,7 @@ namespace ShieldDefender.Screens
             };
             logo = new Logo(new Vector2(480, 30));
             this.screenManager = screenManager;
+            backgroundScreen.Initialize(screenManager);
         }
 
         public void Load(ContentManager content)
@@ -44,6 +52,7 @@ namespace ShieldDefender.Screens
             foreach (Option o in Options) o.LoadContent(content);
             gravedigger = content.Load<SpriteFont>("GraveDigger");
             logo.LoadContent(content);
+            backgroundScreen.Load(content);
         }
 
         public void Update(GameTime gameTime)
@@ -62,6 +71,7 @@ namespace ShieldDefender.Screens
                     }
                 }
             }
+            backgroundScreen.Update(gameTime);
         }
 
         private void Exit()
