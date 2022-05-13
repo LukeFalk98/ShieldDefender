@@ -15,6 +15,7 @@ namespace ShieldDefender
         private KeyboardState keyboardState;
 
         private Vector2 position;
+        public Vector2 Position { get; set; }
 
         private BoundingRectangle bounds;
 

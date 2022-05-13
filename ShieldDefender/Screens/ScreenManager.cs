@@ -13,6 +13,7 @@ namespace ShieldDefender.Screens
         private ContentManager content;
         private ShieldDefenderGame parent;
 
+
         public ScreenManager(ShieldDefenderGame game)
         {
             frontScreen = new TitleScreen(game);

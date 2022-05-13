@@ -21,6 +21,7 @@ namespace ShieldDefender.Screens
         /// The player's end score
         /// </summary>
         public int score;
+        public int highscore;
         
         private ScreenManager screenManager;
 
@@ -30,7 +31,8 @@ namespace ShieldDefender.Screens
             spriteBatch.Begin();
             spriteBatch.DrawString(gravedigger, "GAME OVER", new Vector2(370, 20), Color.Red, 0f, new Vector2(100, 0), 1f, SpriteEffects.None, 0);
             spriteBatch.DrawString(gravedigger, "Score: " + score.ToString(), new Vector2(370, 70), Color.Red, 0f, new Vector2(40, 0), .75f, SpriteEffects.None, 0);
-            spriteBatch.DrawString(gravedigger, "To retry, press A or SPACE\nor press BACK or ESCAPE to quit.", new Vector2(370, 150), Color.Red, 0f, new Vector2(270, 0), .5f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(gravedigger, "Highscore: " + highscore.ToString(), new Vector2(370, 120), Color.Red, 0f, new Vector2(85, 0), .75f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(gravedigger, "To retry, press A or SPACE\nor press BACK or ESCAPE to quit.", new Vector2(370, 230), Color.Red, 0f, new Vector2(270, 0), .5f, SpriteEffects.None, 0);
             spriteBatch.End();
         }
 
@@ -46,11 +48,16 @@ namespace ShieldDefender.Screens
 
         public void Update(GameTime gameTime)
         {
+            if (highscore < score)
+            {
+                highscore = score;
+            }
             if (GamePad.GetState(PlayerIndex.One).Buttons.A == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Space))
             {
                 if (backgroundScreen is GameScreen gs)
                 {
                     gs.Reset();
+                    gs.highscore = highscore;
                 }
                 screenManager.ChangeScreen(backgroundScreen);
             }

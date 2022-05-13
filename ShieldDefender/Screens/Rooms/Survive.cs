@@ -1,28 +1,34 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace ShieldDefender.Screens
+namespace ShieldDefender.Screens.Rooms
 {
-    public class GameScreen : IScreen
+    public class Survive : IRoom
     {
-        private int score = 0;
-        public int highscore = 0;
-
-        private SpriteFont gravedigger;
-        private IScreen background;
-
+        /// <summary>
+        /// The player object
+        /// </summary>
         private Player player;
-        private Arrow[] arrows;
 
-        private float arrowSpawnTime;
-        private System.Random rand;
+        /// <summary>
+        /// The difficulty of the room
+        /// </summary>
         private float difficulty;
+
+        /// <summary>
+        /// TODO: input starting position
+        /// </summary>
+        public Vector2 StartPosition => new Vector2();
+
+        public bool Freeze { get; set; }
+
+        private float TimeRemaining;
+        private BackgroundScreen bg;
 
         private float bombSpawnTime;
         private SoundEffect explosionSound;
@@ -31,13 +37,9 @@ namespace ShieldDefender.Screens
         private float shakeSpeed = .1f;
         private float shakeTimer;
         private float shakeSwapTimer;
-
-        private ContentManager content;
-        private ScreenManager screenManager;
-
-        private SoundEffect[] deflectSounds;
-        private SoundEffect deathSound;
-        private Song backgroundMusic;
+        private Arrow[] arrows;
+        private float arrowSpawnTime;
+        private System.Random rand;
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -68,51 +70,34 @@ namespace ShieldDefender.Screens
             {
                 spriteBatch.Begin();
             }
-            background.Draw(gameTime, spriteBatch);
+            bg.Draw(gameTime, spriteBatch);
             foreach (Arrow a in arrows) if (a != null) a.Draw(spriteBatch);
             if (bomb.IsActive) bomb.Draw(gameTime, spriteBatch);
             player.Draw(spriteBatch);
             spriteBatch.End();
-            spriteBatch.Begin();
-            spriteBatch.DrawString(gravedigger, "Score: " + score.ToString(), new Vector2(2, 2), Color.Red, 0f, new Vector2(0, 0), .75f, SpriteEffects.None, 0);
-            spriteBatch.DrawString(gravedigger, "Use WASD, ARROW KEYS, or the LEFT ANALOG STICK to move.\nFacing an arrow will block the arrow, but not block bombs.", new Vector2(2, 435), Color.Red, 0f, new Vector2(0, 0), .25f, SpriteEffects.None, 0);
-            spriteBatch.End();
+            
         }
 
-        public void Initialize(ScreenManager manager)
+        public void Initialize(Player player, ScreenManager screenManager, float difficulty)
         {
-            background = new BackgroundScreen();
-            screenManager = manager;
-            rand = new Random(); 
-            player = new Player(new Vector2(400, 240));
-            arrows = new Arrow[100];
-            deflectSounds = new SoundEffect[4];
-            bomb = new Bomb();
-            difficulty = .5f;
+            this.player = player;
+            this.difficulty = difficulty;
+            player.Position = StartPosition;
+            TimeRemaining = 15 + (float)Math.Floor(difficulty/5)*5; // player will survive for time in intervals of 5
+            bg = new BackgroundScreen();
+            bg.Initialize(screenManager);
         }
 
         public void Load(ContentManager content)
         {
-            this.content = content;
-            background.Initialize(screenManager);
-            background.Load(content);
-            gravedigger = content.Load<SpriteFont>("GraveDigger");
-            player.LoadContent(content);
-            for (int i = 0; i < deflectSounds.Length; i++) 
-            {
-                deflectSounds[i] = content.Load<SoundEffect>("block" + i.ToString());
-            }
-            deathSound = content.Load<SoundEffect>("Hurt");
-            explosionSound = content.Load<SoundEffect>("ExplosionSound");
-            backgroundMusic = content.Load<Song>("mixkit-infected-vibes-157");
+            bg.Load(content);
             bomb.LoadContent(content);
-            MediaPlayer.IsRepeating = true;
-            MediaPlayer.Play(backgroundMusic);
+            rand = new Random();
         }
 
         public void Update(GameTime gameTime)
         {
-            arrowSpawnTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            /*arrowSpawnTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (arrowSpawnTime > 1 / difficulty)
             {
@@ -192,75 +177,7 @@ namespace ShieldDefender.Screens
                     if (player.Collideswith(bomb.Bounds)) GameOver();
                     else score += 5;
                 }
-            }
-        }
-
-        /// <summary>
-        /// This is called to reset the game screen for another game
-        /// </summary>
-        public void Reset()
-        {
-            player = new Player(new Vector2(400, 240));
-            arrows = new Arrow[100];
-            difficulty = .5f;
-            score = 0;
-        }
-
-        /// <summary>
-        /// This is executed whenever game over occurs
-        /// </summary>
-        private void GameOver()
-        {
-            MediaPlayer.Stop();
-            deathSound.Play();
-            var newScreen = new GameOverScreen();
-            newScreen.score = score;
-            newScreen.backgroundScreen = this;
-            newScreen.highscore = highscore;
-            screenManager.ChangeScreen(newScreen);
-        }
-
-        /// <summary>
-        /// This spawns another arrow
-        /// </summary>
-        private void SpawnArrow()
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (arrows[i] == null)
-                {
-                    Direction direction = (Direction)rand.Next(0, 4);
-                    switch (direction)
-                    {
-                        case Direction.down:
-                            arrows[i] = new Arrow(direction, difficulty, new Vector2((float)rand.NextDouble() * 800, 0));
-                            break;
-                        case Direction.left:
-                            arrows[i] = new Arrow(direction, difficulty, new Vector2(800, (float)rand.NextDouble() * 480));
-                            break;
-                        case Direction.right:
-                            arrows[i] = new Arrow(direction, difficulty, new Vector2(0, (float)rand.NextDouble() * 480));
-                            break;
-                        case Direction.up:
-                            arrows[i] = new Arrow(direction, difficulty, new Vector2((float)rand.NextDouble() * 800, 480));
-                            break;
-                    }
-                    arrows[i].LoadContent(content);
-                    break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// This removes an arrow from play
-        /// </summary>
-        /// <param name="arrow">the arrow to remove</param>
-        private void DespawnArrow(Arrow arrow)
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                if (arrow == arrows[i]) arrows[i] = null;
-            }
+            }*/
         }
     }
 }
